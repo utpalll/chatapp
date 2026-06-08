@@ -230,9 +230,11 @@ bool do_handshake(int fd, std::string& buf) {
         return false;
     }
 
-    // Extract Sec-WebSocket-Key
+    // Extract Sec-WebSocket-Key (case-insensitive for Railway proxy)
     std::string key;
     auto pos = buf.find("Sec-WebSocket-Key:");
+    if (pos == std::string::npos) pos = buf.find("sec-websocket-key:");
+    if (pos == std::string::npos) pos = buf.find("SEC-WEBSOCKET-KEY:");
     if (pos == std::string::npos) return false;
     pos += 18;
     while (pos < buf.size() && buf[pos] == ' ') pos++;
