@@ -458,7 +458,13 @@ int main() {
     // Read PORT from environment (Railway sets this automatically)
     int PORT = 8080;
     const char* port_env = std::getenv("PORT");
-    if (port_env) PORT = std::stoi(port_env);
+    if (port_env && strlen(port_env) > 0) {
+        try { PORT = std::stoi(port_env); } catch(...) { PORT = 8080; }
+    }
+
+    std::cerr << "Starting NexusChat server..." << std::endl;
+    std::cerr << "PORT env: " << (port_env ? port_env : "not set") << std::endl;
+    std::cerr << "Binding to port: " << PORT << std::endl;
 
     int srv = socket(AF_INET, SOCK_STREAM, 0);
     if (srv < 0) { perror("socket"); return 1; }
