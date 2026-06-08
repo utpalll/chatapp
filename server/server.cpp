@@ -216,6 +216,9 @@ bool do_handshake(int fd, std::string& buf) {
         if (buf.size() > 16384) return false;
     }
 
+    // Debug: print what we received
+    std::cerr << "=== HTTP REQUEST ===\n" << buf.substr(0, 500) << "\n==================" << std::endl;
+
     // Plain HTTP GET (Railway health check) → respond 200 and close
     if (buf.find("Upgrade: websocket") == std::string::npos &&
         buf.find("upgrade: websocket") == std::string::npos) {
