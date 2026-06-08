@@ -462,10 +462,6 @@ int main() {
         try { PORT = std::stoi(port_env); } catch(...) { PORT = 8080; }
     }
 
-    std::cerr << "Starting NexusChat server..." << std::endl;
-    std::cerr << "PORT env: " << (port_env ? port_env : "not set") << std::endl;
-    std::cerr << "Binding to port: " << PORT << std::endl;
-
     int srv = socket(AF_INET, SOCK_STREAM, 0);
     if (srv < 0) { perror("socket"); return 1; }
 
@@ -482,9 +478,8 @@ int main() {
     }
     if (listen(srv, BACKLOG) < 0) { perror("listen"); return 1; }
 
-    std::cout << "╔══════════════════════════════════╗\n"
-              << "║   C++ Chat Server — Port " << PORT << "   ║\n"
-              << "╚══════════════════════════════════╝\n";
+    std::cout << "NexusChat server running on port " << PORT << std::endl;
+    std::cerr << "NexusChat server running on port " << PORT << std::endl;
 
     // Pre-create general room history
     room_history["general"];
