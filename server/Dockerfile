@@ -8,9 +8,10 @@ WORKDIR /app
 COPY server.cpp .
 
 RUN g++ -std=c++17 -O2 -pthread -o chat_server server.cpp \
-    -lssl -lcrypto -lpthread && \
-    echo "Build OK"
+    -Wl,-Bstatic -lssl -lcrypto \
+    -Wl,-Bdynamic -lpthread && \
+    echo "Build OK" && \
+    ldd chat_server
 
-ENV PORT=8080
 EXPOSE 8080
 CMD ["./chat_server"]
