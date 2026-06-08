@@ -39,7 +39,6 @@
 #include <openssl/buffer.h>
 
 // ── Configuration ────────────────────────────────────────────
-static const int    PORT          = 8080;
 static const int    BACKLOG       = 64;
 static const size_t MAX_MSG_BYTES = 65536;
 static const char*  WS_MAGIC      = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -215,6 +214,20 @@ bool do_handshake(int fd, std::string& buf) {
         buf.append(tmp, n);
         if (buf.find("\r\n\r\n") != std::string::npos) break;
         if (buf.size() > 16384) return false;
+    }
+
+    // Plain HTTP GET (Railway health check) → respond 200 and close
+    if (buf.find("Upgrade: websocket") == std::string::npos &&
+        buf.find("upgrade: websocket") == std::string::npos) {
+        const char* ok =
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/plain\r\n"
+            "Content-Length: 2\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+            "OK";
+        send(fd, ok, strlen(ok), MSG_NOSIGNAL);
+        return false;
     }
 
     // Extract Sec-WebSocket-Key
@@ -441,6 +454,11 @@ disconnect:
 // ── Main ─────────────────────────────────────────────────────
 int main() {
     signal(SIGPIPE, SIG_IGN);
+
+    // Read PORT from environment (Railway sets this automatically)
+    int PORT = 8080;
+    const char* port_env = std::getenv("PORT");
+    if (port_env) PORT = std::stoi(port_env);
 
     int srv = socket(AF_INET, SOCK_STREAM, 0);
     if (srv < 0) { perror("socket"); return 1; }
