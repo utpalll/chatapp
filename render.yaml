@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nexuschat-server
+    env: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+    healthCheckPath: /
