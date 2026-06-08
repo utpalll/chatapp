@@ -462,8 +462,10 @@ int main() {
         try { PORT = std::stoi(port_env); } catch(...) { PORT = 8080; }
     }
 
+    std::cerr << "[1] Creating socket..." << std::endl;
     int srv = socket(AF_INET, SOCK_STREAM, 0);
-    if (srv < 0) { perror("socket"); return 1; }
+    if (srv < 0) { perror("socket failed"); return 1; }
+    std::cerr << "[2] Socket OK, binding port " << PORT << std::endl;
 
     int opt = 1;
     setsockopt(srv, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -474,10 +476,13 @@ int main() {
     addr.sin_port        = htons(PORT);
 
     if (bind(srv, (sockaddr*)&addr, sizeof(addr)) < 0) {
-        perror("bind"); return 1;
+        std::cerr << "bind failed on port " << PORT << " errno=" << errno << std::endl;
+        perror("bind");
+        return 1;
     }
-    if (listen(srv, BACKLOG) < 0) { perror("listen"); return 1; }
+    std::cerr << "[3] Bind OK" << std::endl;
 
+    if (listen(srv, BACKLOG) < 0) { perror("listen"); return 1; }
     std::cout << "NexusChat server running on port " << PORT << std::endl;
     std::cerr << "NexusChat server running on port " << PORT << std::endl;
 
